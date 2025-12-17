@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+</head>
+
+<body>
+    <div class="status-bar"
+        style="background: white; padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+        <div class="account-info" style="color: #0066cc; font-weight: bold;">
+            <label for="account-selector">Account:</label>
+            <select id="account-selector">
+                <option value="">Loading accounts...</option>
+            </select>
+            <span id="account">Connecting...</span>
+        </div>
+    </div>
+    <h1>Tender Details</h1>
+    <div class="tender-details">
+        <p><strong>Tender ID:</strong> <span id="tender-id"></span></p>
+        <p><strong>Owner:</strong> <span id="tender-owner"></span></p>
+        <p><strong>Title:</strong> <span id="tender-title"></span></p>
+        <p><strong>Description:</strong> <span id="tender-description"></span></p>
+        <p><strong>Reward:</strong> <span id="tender-reward"></span></p>
+        <p><strong>Status:</strong> <span id="tender-status"></span></p>
+        <p><strong>Max Participants:</strong> <span id="tender-max-participants"></span></p>
+        <p><strong>Current number of participants:</strong> <span id="tender-current-participants"></span></p>
+        <form action="" id="addParticipantForm">
+            <label for="participantAddress">Add commition participant:</label>
+            <input type="text" id="participantAddress" name="add-commition-participant">
+            <button type="submit">Add</button>
+        </form>
+        <button id="release-button">Release Tender</button>
+        <form action="" id="participateForm">
+            <label for="offer">Offer:</label>
+            <input type="text" id="offer" name="offer">
+            <button type="submit">Participate</button>
+        </form>
+        <button id="get-offers-button">Get offers</button>
+        <div class="offers" id="offers"></div>
+        <form action="" id="voteForm">
+            <label for="voteAddress">Vote for participant (address):</label>
+            <input type="text" id="voteAddress" name="vote-participant">
+            <button type="submit">Vote</button>
+        </form>
+        <button id="find-winner-button">Find Winner</button>
+        <div class="winner"></div>
+    </div>
+
+    <script src="scripts.js"></script>
+    <script>
+        // Get tenderIndex from URL query parameter
+        const params = new URLSearchParams(window.location.search);
+        const tenderIndex = params.get('tenderIndex');
+
+        // Display tender index
+        if (tenderIndex) {
+            document.getElementById('tender-id').textContent = tenderIndex;
+        }
+
+        // Wait for Web3 and contract to be initialized, then load tender details
+        async function loadTenderDetails() {
+            // Wait for contract to be ready
+            let attempts = 0;
+            while (!contract && attempts < 50) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
+            }
+
+            if (!contract) {
+                console.error('Contract failed to initialize');
+                return;
+            }
+
+            // Load all tender details with detailed error logging
+            //try {
+            console.log('Loading tender details for index:', tenderIndex);
+
+            console.log('Calling getTenderOwner...');
+            const owner = await contract.methods.getTenderOwner(tenderIndex).call();
+            document.getElementById('tender-owner').textContent = owner;
+
+            console.log('Calling getTenderTitle...');
+            const title = await getTenderTitle(tenderIndex);
+            document.getElementById('tender-title').textContent = title;
+
+            console.log('Calling getTenderDescription...');
+            const description = await contract.methods.getTenderDescription(tenderIndex).call();
+            document.getElementById('tender-description').textContent = description;
+
+            console.log('Calling getTenderReward...');
+            const reward = await contract.methods.getTenderReward(tenderIndex).call();
+            document.getElementById('tender-reward').textContent = reward;
+
+            console.log('Calling getTenderMaxParticipantsNumber...');
+            const maxParticipants = await contract.methods.getTenderMaxParticipantsNumber(tenderIndex).call();
+            document.getElementById('tender-max-participants').textContent = maxParticipants;
+
+            console.log('Calling getTenderCurrentParticipantsNumber...');
+            const currentParticipants = await contract.methods.getTenderCurrentParticipantsNumber(tenderIndex).call();
+            document.getElementById('tender-current-participants').textContent = currentParticipants;
+
+            console.log('Calling getIsReleased...');
+            const isReleased = await contract.methods.getIsReleased(tenderIndex).call();
+            document.getElementById('tender-status').textContent = isReleased ? 'Released' : 'Not Released';
+
+            console.log('All tender details loaded successfully');
+            /*} catch (error) {
+                console.error('Error loading tender details:', error.message || error);
+                console.error('Full error:', error);
+                //alert('Error loading tender: ' + (error.message || error));
+            }*/
+        }
+
+        // Start loading when page is ready
+        window.addEventListener('DOMContentLoaded', loadTenderDetails);
+
+        document.getElementById('release-button').addEventListener('click', async () => {
+            await releaseTender(tenderIndex);
+            location.reload();
+        });
+
+        document.getElementById('get-offers-button').addEventListener('click', async () => {
+            const offers = await getOffers(tenderIndex);
+            const offersDiv = document.getElementById('offers');
+            offersDiv.innerHTML = '';
+            if (offers && offers[0] && offers[1]) {
+                for (let i = 0; i < offers[0].length; i++) {
+                    const offerElement = document.createElement('div');
+                    offerElement.textContent = `Participant: ${offers[0][i]}, Offer: ${offers[1][i]}`;
+                    offersDiv.appendChild(offerElement);
+                }
+            }
+        });
+
+        document.getElementById('find-winner-button').addEventListener('click', async () => {
+            const winner = await findWinner(tenderIndex);
+            const winnerDiv = document.querySelector('.winner');
+            if (winner && winner[0]) {
+                winnerDiv.innerHTML = `<p><strong>Winner Address:</strong> ${winner[0]}</p><p><strong>Offer:</strong> ${winner[1]}</p>`;
+            } else {
+                winnerDiv.textContent = 'No winner found';
+            }
+        });
+    </script>
+</body>
+
+</html>
