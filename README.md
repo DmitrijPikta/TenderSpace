@@ -13,3 +13,21 @@ Smart contract that implements tender space platform work: give space for tender
 7. After CurrentParticipantNumber equal MaxParticipantNumber commition participants and tender owner can vote. For commition participants voting is mandatory, for tender owner optional.
 8. After all commition participants have voted, tender owner can find winner. Winner would be find, write to tender info and would get reward.
 9. After winner is find, tender owner can get its address and offer.
+
+## Stages of work
+1. Created Solidity smart contract in Remix
+<img width="730" height="604" alt="image" src="https://github.com/user-attachments/assets/71e51646-0c39-4c11-8107-1b3621954e8a" />
+
+3. Deployed smart contract on Ganashe local blockchain using truffle IDE.
+<img width="1173" height="299" alt="Screenshot 2025-12-18 142005" src="https://github.com/user-attachments/assets/a07a3a5f-392f-4e0b-8961-7a69479131c0" />
+
+4. Created simple UI for smart contract
+<img width="1169" height="417" alt="image" src="https://github.com/user-attachments/assets/6e9c3413-346d-4d61-83fc-7999c9329f5b" />
+
+5. Deployed smart contract on Sepolia test network using MetaMask
+<img width="346" height="145" alt="image" src="https://github.com/user-attachments/assets/ea8c100d-dd8a-491d-b701-ee26fac93975" />
+
+6. Viewing transactions in Sepolia EtherScan
+<img width="1347" height="139" alt="image" src="https://github.com/user-attachments/assets/8e287533-4957-4b12-b32a-c3c1210833b3" />
+
+
